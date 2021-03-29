@@ -15,40 +15,52 @@ class Player:
         self.total = 0
         # we might not need turn total
 
-
-
     def __str__(self):
         return f"{self.name} has {self.total}points"
 
 
 class Game:
     def __init__(self, name1, name2):
-        self.player = [Player(name1), Player(name2)]
+        self.players = [Player(name1), Player(name2)]
         self.turn_total = 0
         self.total = 0
+        self.current_player = 0
 
+    def next_player(self):
+        if self.current_player + 1 == len(self.players):
+            self.current_player = 0
+        else:
+            self.current_player += 1
 
     def play(self):
-        roll_die = 'r'
-        hold = 'h'
-        while self.player[0].total < 100 and self.player[1].total < 100:
-            print()
-            turn_input = input('Dou you want to roll or hold? ')
+        turn_total = 0
+        while self.players[0].total < 100 and self.players[1].total < 100:
+            turn_input = input(f'{self.players[self.current_player].name}, do you want to roll or hold? ')
             if turn_input == 'r':
                 die_value = random.randint(1, 6)
                 if die_value == 1:
-                    print("Your Scored 0")
-                    self.total = 0
+                    print(f"{self.players[self.current_player].name} you roll a 1. Your score for this round is 0")
+                    print("----------------------------------------------------------------")
+                    turn_total = 0
+                    self.next_player()
+                    continue
+                else:
+                    print(f"{self.players[self.current_player].name} you roll a {die_value}.")
+                    turn_total += die_value
+                    if turn_total + self.players[self.current_player].total >= 100:
+                        self.players[self.current_player].total += turn_total
+                        print(f"{self.players[self.current_player].name} you are the WINNER.")
+                        print(f"Your winning score is {self.players[self.current_player].total}")
+                        continue
 
-                elif 2 <= die_value <= 6:
-                    print(f"You rolled a {die_value}")
-                    self.total = self.total + die_value
-                    print(f"Your score is {self.total}")
-
+                    print(f"Your turn score is {turn_total}")
+                    print(f"Your possible score if you hold is {turn_total + self.players[self.current_player].total}")
             elif turn_input == 'h':
-                self.total += self.turn_total
-                print(f"Your score is{self.total}. Turn is over")
-
+                self.players[self.current_player].total += turn_total
+                print(f"Your score is {self.players[self.current_player].total}. Turn is over")
+                print("----------------------------------------------------------------")
+                turn_total = 0
+                self.next_player()
             else:
                 print("Game is over!")
 
